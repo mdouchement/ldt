@@ -392,7 +392,7 @@ var osLibrary = []lua.RegistryFunction{
 		},
 	},
 	{
-		// os.write_file("sha256", "/sbin/nologin")
+		// os.checksum("sha256", "/sbin/nologin")
 		Name: "checksum",
 		Function: func(l *lua.State) int {
 			alg := primitive.ChecksumAlg(lua.CheckString(l, 1))

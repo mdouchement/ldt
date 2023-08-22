@@ -9,8 +9,7 @@ import (
 	"time"
 
 	"github.com/Shopify/go-lua"
-	"github.com/vbauerster/mpb/v7"
-	"github.com/vbauerster/mpb/v7/decor"
+	"github.com/mdouchement/ldt/pkg/primitive"
 )
 
 var httpLibrary = []lua.RegistryFunction{
@@ -66,7 +65,7 @@ var httpLibrary = []lua.RegistryFunction{
 			var r io.Reader = resp.Body
 			if showProgress {
 				defer time.Sleep(500 * time.Millisecond) // just to avoid glitches.
-				r = withProgressBar(resp.ContentLength, r)
+				r = primitive.WithProgressBar(resp.ContentLength, r)
 			}
 
 			if _, err := io.Copy(f, r); err != nil {
@@ -90,28 +89,4 @@ func HTTPOpen(l *lua.State) {
 	}
 	lua.Require(l, "lualib/http", open, false)
 	l.Pop(1)
-}
-
-// -------------
-// --------------------------- //
-// Utils                       //
-// --------------------------- //
-// --------
-
-func withProgressBar(size int64, r io.Reader) io.Reader {
-	p := mpb.New(
-		mpb.WithWidth(60),
-		mpb.WithRefreshRate(180*time.Millisecond),
-	)
-	bar := p.AddBar(size,
-		mpb.PrependDecorators(
-			decor.CountersKibiByte("% 6.1f / % 6.1f"),
-		),
-		mpb.AppendDecorators(
-			decor.EwmaETA(decor.ET_STYLE_MMSS, float64(size)/2048),
-			decor.Name(" ] "),
-			decor.AverageSpeed(decor.UnitKiB, "% .2f"),
-		),
-	)
-	return bar.ProxyReader(r)
 }
