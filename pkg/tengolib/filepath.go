@@ -132,12 +132,12 @@ var filepathModule = map[string]tengo.Object{
 			}
 
 			matches := new(tengo.Array)
-			err := filepath.WalkDir(root, func(path string, info fs.DirEntry, err error) error {
+			err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 				if err != nil {
 					return err
 				}
 
-				if info.IsDir() {
+				if d.IsDir() {
 					return nil
 				}
 

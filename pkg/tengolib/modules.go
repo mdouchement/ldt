@@ -9,7 +9,8 @@ var BuiltinModules = map[string]map[string]tengo.Object{
 	"filepath": filepathModule,
 	"http":     httpModule,
 	"ldt":      ldtModule,
-	"os":       osModule, // Missing functions from github.com/d5/tengo/v2/stdlib
+	"os":       osModule,    // Missing functions from github.com/d5/tengo/v2/stdlib
+	"times":    timesModule, // Missing functions from github.com/d5/tengo/v2/stdlib
 	"yaml":     yamlModule,
 }
 
@@ -41,7 +42,7 @@ func MergeModule(modules *tengo.ModuleMap, names ...string) {
 			// Merge with existing one
 			m := modules.GetBuiltinModule(name)
 			if m != nil {
-				for k, v := range osModule {
+				for k, v := range mod {
 					m.Attrs[k] = v
 				}
 

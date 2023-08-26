@@ -5,11 +5,13 @@ import (
 	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
+	"fmt"
 	"hash"
 	"hash/crc32"
+	"hash/fnv"
 	"io"
 
-	"github.com/pkg/errors"
+	"github.com/zeebo/xxh3"
 	"golang.org/x/crypto/blake2b"
 )
 
@@ -19,6 +21,8 @@ type ChecksumAlg string
 // List of supported hash algs.
 const (
 	ChecksumCRC32      ChecksumAlg = "crc32"
+	ChecksumFNV1A64    ChecksumAlg = "fnv1a64"
+	ChecksumXXH3       ChecksumAlg = "xxh3" // xxHash 64bit
 	ChecksumMD5        ChecksumAlg = "md5"
 	ChecksumSHA1       ChecksumAlg = "sha1"
 	ChecksumSHA256     ChecksumAlg = "sha256"
@@ -38,6 +42,10 @@ func Checksum(r io.Reader, algs ...ChecksumAlg) (map[ChecksumAlg]hash.Hash, erro
 		switch alg {
 		case ChecksumCRC32:
 			h = crc32.New(crc32.IEEETable)
+		case ChecksumFNV1A64:
+			h = fnv.New64a()
+		case ChecksumXXH3:
+			h = xxh3.New()
 		case ChecksumMD5:
 			h = md5.New()
 		case ChecksumSHA1:
@@ -49,15 +57,15 @@ func Checksum(r io.Reader, algs ...ChecksumAlg) (map[ChecksumAlg]hash.Hash, erro
 		case ChecksumBLAKE2B:
 			h, err = blake2b.New256(nil)
 			if err != nil {
-				return nil, errors.Wrap(err, "blake2b")
+				return nil, fmt.Errorf("blake2b: %w", err)
 			}
 		case ChecksumBLAKE2B512:
 			h, err = blake2b.New512(nil)
 			if err != nil {
-				return nil, errors.Wrap(err, "blake2b")
+				return nil, fmt.Errorf("blake2b: %w", err)
 			}
 		default:
-			return nil, errors.Errorf("Unsuported algorithm: %s", alg)
+			return nil, fmt.Errorf("Unsuported algorithm: %s", alg)
 		}
 		hashes = append(hashes, h)
 		mhashes[alg] = h
@@ -65,5 +73,8 @@ func Checksum(r io.Reader, algs ...ChecksumAlg) (map[ChecksumAlg]hash.Hash, erro
 
 	w := io.MultiWriter(hashes...)
 	_, err = io.Copy(w, r)
-	return mhashes, errors.Wrap(err, "checksum")
+	if err != nil {
+		return nil, fmt.Errorf("checksum: %w", err)
+	}
+	return mhashes, nil
 }

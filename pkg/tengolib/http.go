@@ -15,7 +15,7 @@ import (
 )
 
 var httpModule = map[string]tengo.Object{
-	// http.join("https://localhost", "to", "file")
+	// http.join(url string, path ...string) ==> error
 	"join": &tengo.UserFunction{
 		Name: "join",
 		Value: func(args ...tengo.Object) (tengo.Object, error) {
@@ -55,7 +55,7 @@ var httpModule = map[string]tengo.Object{
 			return &tengo.String{Value: uri.String()}, nil
 		},
 	},
-	// http.download("https://localhost/file", "/tmp/file", true)
+	// http.download(url string, dst string, progress bool) => error
 	// => true for displaying progress bar
 	"download": &tengo.UserFunction{
 		Name: "download",

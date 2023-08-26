@@ -13,7 +13,7 @@ import (
 var envcache = make(map[string]*primitive.Env)
 
 var ldtModule = map[string]tengo.Object{
-	// ldt.halt("halt message")
+	// ldt.halt(msg string)
 	"halt": &tengo.UserFunction{
 		Name: "halt",
 		Value: FuncASR(func(msg string) {
@@ -21,7 +21,54 @@ var ldtModule = map[string]tengo.Object{
 			os.Exit(1)
 		}),
 	},
-	// ldt.load_direnv(filename)
+	// ldt.catch(...any) => Catcher
+	"catch": &tengo.UserFunction{
+		Name: "catch",
+		Value: func(args ...tengo.Object) (tengo.Object, error) {
+			methods := &tengo.ImmutableMap{
+				Value: map[string]tengo.Object{
+					// halt() => undefined
+					"halt": &tengo.UserFunction{
+						Name: "halt",
+						Value: func(nargs ...tengo.Object) (tengo.Object, error) {
+							if len(nargs) != 0 {
+								return nil, tengo.ErrWrongNumArguments
+							}
+
+							for _, arg := range args {
+								if _, ok := arg.(*tengo.Error); ok {
+									fmt.Println(arg)
+									os.Exit(1)
+								}
+							}
+
+							return nil, nil
+						},
+					},
+					// first() => error/undefined
+					"first": &tengo.UserFunction{
+						Name: "first",
+						Value: func(nargs ...tengo.Object) (tengo.Object, error) {
+							if len(nargs) != 0 {
+								return nil, tengo.ErrWrongNumArguments
+							}
+
+							for _, arg := range args {
+								if err, ok := arg.(*tengo.Error); ok {
+									return err, nil
+								}
+							}
+
+							return nil, nil
+						},
+					},
+				},
+			}
+
+			return methods, nil
+		},
+	},
+	// ldt.load_direnv(filename string) => error
 	"load_direnv": &tengo.UserFunction{
 		Name: "load_direnv",
 		Value: stdlib.FuncASRE(func(filename string) error {
@@ -47,7 +94,7 @@ var ldtModule = map[string]tengo.Object{
 			return nil
 		}),
 	},
-	// ldt.unload_direnv(filename)
+	// ldt.unload_direnv(filename string) => error
 	"unload_direnv": &tengo.UserFunction{
 		Name: "unload_direnv",
 		Value: stdlib.FuncASRE(func(filename string) error {

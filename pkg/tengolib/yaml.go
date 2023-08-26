@@ -6,10 +6,12 @@ import (
 )
 
 var yamlModule = map[string]tengo.Object{
+	// yaml.decode(bytes) => map/error
 	"decode": &tengo.UserFunction{
 		Name:  "decode",
 		Value: yamlDecode,
 	},
+	// yaml.emcode(map) => bytes/error
 	"encode": &tengo.UserFunction{
 		Name:  "encode",
 		Value: yamlEncode,

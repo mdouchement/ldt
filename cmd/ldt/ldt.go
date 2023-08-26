@@ -71,7 +71,7 @@ func action(_ *cobra.Command, args []string) error {
 	}
 	args[0] = filenames[0]
 
-	fmt.Println("Run", filenames[0])
+	fmt.Println("Using", filenames[0])
 
 	if run, ok := mextensions[filepath.Ext(args[0])]; ok {
 		return run(args)
