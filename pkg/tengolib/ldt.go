@@ -25,8 +25,24 @@ var ldtModule = map[string]tengo.Object{
 	"catch": &tengo.UserFunction{
 		Name: "catch",
 		Value: func(args ...tengo.Object) (tengo.Object, error) {
-			methods := &tengo.ImmutableMap{
+			var methods *tengo.ImmutableMap
+			methods = &tengo.ImmutableMap{
 				Value: map[string]tengo.Object{
+					// output() => Catcher
+					"output": &tengo.UserFunction{
+						Name: "output",
+						Value: func(nargs ...tengo.Object) (tengo.Object, error) {
+							if len(nargs) != 0 {
+								return nil, tengo.ErrWrongNumArguments
+							}
+
+							for _, arg := range args {
+								fmt.Println(arg)
+							}
+
+							return methods, nil
+						},
+					},
 					// halt() => undefined
 					"halt": &tengo.UserFunction{
 						Name: "halt",
@@ -42,7 +58,7 @@ var ldtModule = map[string]tengo.Object{
 								}
 							}
 
-							return nil, nil
+							return tengo.UndefinedValue, nil
 						},
 					},
 					// first() => error/undefined
@@ -59,7 +75,7 @@ var ldtModule = map[string]tengo.Object{
 								}
 							}
 
-							return nil, nil
+							return tengo.UndefinedValue, nil
 						},
 					},
 				},

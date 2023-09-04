@@ -186,6 +186,45 @@ var osModule = map[string]tengo.Object{
 			return upathex.ExpandEnv(path)
 		}),
 	},
+	// os.indir(dir string, handler func() error) => error
+	// "indir": &tengo.UserFunction{
+	// 	Name: "indir",
+	// 	Value: func(args ...tengo.Object) (tengo.Object, error) {
+	// 		if len(args) < 2 {
+	// 			return nil, tengo.ErrWrongNumArguments
+	// 		}
+
+	// 		workdir, ok := tengo.ToString(args[0])
+	// 		if !ok {
+	// 			return nil, tengo.ErrInvalidArgumentType{
+	// 				Name:     "first",
+	// 				Expected: "string(compatible)",
+	// 				Found:    args[0].TypeName(),
+	// 			}
+	// 		}
+
+	// 		orginal, err := os.Getwd()
+	// 		if err != nil {
+	// 			return wrapError(err), nil
+	// 		}
+
+	// 		if err := os.Chdir(workdir); err != nil {
+	// 			return wrapError(err), nil
+	// 		}
+	// 		defer os.Chdir(orginal) // Should not return an error
+
+	// 		handler, ok := args[1].(*tengo.CompiledFunction)
+	// 		if !ok {
+	// 			return nil, tengo.ErrInvalidArgumentType{
+	// 				Name:     "second",
+	// 				Expected: "func(compatible)",
+	// 				Found:    args[1].TypeName(),
+	// 			}
+	// 		}
+
+	// 		return handler.Call() // Await https://github.com/d5/tengo/pull/372
+	// 	},
+	// },
 	// os.archive(name string, path ...string) => error
 	"archive": &tengo.UserFunction{
 		Name: "archive",
@@ -238,7 +277,6 @@ var osModule = map[string]tengo.Object{
 				}
 				base = primitive.LongestCommonPathPrefix(base, root)
 			}
-			fmt.Println(base)
 
 			var files []*archive.File
 			for idx, arg := range args[1:] {
