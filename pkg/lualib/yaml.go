@@ -30,7 +30,7 @@ var yamlLibrary = []lua.RegistryFunction{
 		Name: "parse",
 		Function: func(l *lua.State) int {
 			payload := lua.CheckString(l, 1)
-			var output interface{}
+			var output any
 			if err := yaml.Unmarshal([]byte(payload), &output); err != nil {
 				lua.Errorf(l, err.Error())
 			}

@@ -9,7 +9,11 @@ import (
 
 	"github.com/Shopify/go-lua"
 	"github.com/Shopify/goluago"
+	"github.com/d5/tengo/v2"
+	"github.com/d5/tengo/v2/parser"
+	"github.com/d5/tengo/v2/stdlib"
 	"github.com/mdouchement/ldt/pkg/lualib"
+	"github.com/mdouchement/ldt/pkg/tengolib"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -23,7 +27,13 @@ var (
 	revision = "none"
 	date     = "unknown"
 
-	list bool
+	list        bool
+	extensions  = []string{".tgo", ".tengo", ".lua"} // in precedence order
+	mextensions = map[string]func([]string) error{
+		".lua":   runlua,
+		".tengo": runtengo,
+		".tgo":   runtengo,
+	}
 )
 
 func main() {
@@ -46,6 +56,31 @@ func action(_ *cobra.Command, args []string) error {
 		return listActions()
 	}
 
+	// The extension is already in the action.
+	if run, ok := mextensions[filepath.Ext(args[0])]; ok {
+		return run(args)
+	}
+
+	// The action does not have any extension.
+	filenames, err := lookup(args[0])
+	if err != nil {
+		return errors.Wrap(err, "could not lookup action")
+	}
+	if len(filenames) == 0 {
+		return errors.New("not found")
+	}
+	args[0] = filenames[0]
+
+	fmt.Println("Using", filenames[0])
+
+	if run, ok := mextensions[filepath.Ext(args[0])]; ok {
+		return run(args)
+	}
+
+	return errors.New("unsupported action format")
+}
+
+func runlua(args []string) error {
 	// Initialize Lua's VM and add defaults libraries
 	state := lua.NewState()
 	lua.OpenLibraries(state)
@@ -65,21 +100,80 @@ func action(_ *cobra.Command, args []string) error {
 	}
 
 	// Run the script
-	return errors.Wrap(lua.DoFile(state, args[0]+".lua"), "could not run action")
+	return errors.Wrap(lua.DoFile(state, args[0]), "could not run action")
+}
+
+func runtengo(args []string) error {
+	// Load modules
+	modules := stdlib.GetModuleMap(stdlib.AllModuleNames()...)
+	tengolib.MergeModule(modules, tengolib.AllModuleNames()...)
+
+	// Compile source code
+	code, err := os.ReadFile(args[0])
+	if err != nil {
+		return err
+	}
+
+	fileset := parser.NewFileSet()
+	src := fileset.AddFile(filepath.Base(args[0]), -1, len(code))
+
+	p := parser.NewParser(src, code, nil)
+	file, err := p.ParseFile()
+	if err != nil {
+		return err
+	}
+
+	c := tengo.NewCompiler(src, nil, nil, modules, nil)
+	c.EnableFileImport(true)
+	c.SetImportDir(filepath.Dir(args[0]))
+
+	if err := c.Compile(file); err != nil {
+		return err
+	}
+
+	bytecode := c.Bytecode()
+	bytecode.RemoveDuplicates()
+
+	// Run the script
+	vm := tengo.NewVM(bytecode, nil, -1)
+	return vm.Run()
 }
 
 func listActions() error {
-	files, err := filepath.Glob("*.lua")
+	filenames, err := lookup("*")
 	if err != nil {
 		return errors.Wrap(err, "could not list actions")
 	}
 
+	dup := make(map[string]int)
+	for _, filename := range filenames {
+		action := filename[:len(filename)-len(filepath.Ext(filename))]
+		dup[action]++
+	}
+
 	fmt.Println("Available actions")
 	fmt.Println("=================")
-	for _, file := range files {
-		action := file[:len(file)-len(filepath.Ext(file))]
+	for _, filename := range filenames {
+		action := filename[:len(filename)-len(filepath.Ext(filename))]
+		if dup[action] > 1 {
+			action = filename
+		}
 		fmt.Printf("  %s %s\n", appname, action)
 	}
 
 	return nil
+}
+
+func lookup(basename string) ([]string, error) {
+	var filenames []string
+	for _, ext := range extensions {
+		files, err := filepath.Glob(basename + ext)
+		if err != nil {
+			return nil, err
+		}
+
+		filenames = append(filenames, files...)
+	}
+
+	return filenames, nil
 }

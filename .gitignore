@@ -1,2 +1,7 @@
+*.DS_Store
 dist/
 *.lua
+*.tengo
+*.tgo
+xyz.go
+*.tar
