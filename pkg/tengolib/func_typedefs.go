@@ -135,5 +135,5 @@ func Format(args ...tengo.Object) (string, error) {
 		}
 	}
 
-	return fmt.Sprintf(format, InterfaceArray(args[1:])), nil
+	return fmt.Sprintf(format, InterfaceArray(args[1:])...), nil
 }
