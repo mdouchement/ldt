@@ -119,7 +119,7 @@ var osModule = map[string]tengo.Object{
 				return os.Chown(path, uid, gid)
 			})
 
-			return wrapError(err), nil
+			return WrapError(err), nil
 		},
 	},
 	// os.cp(src string, dst string) => error
@@ -205,11 +205,11 @@ var osModule = map[string]tengo.Object{
 
 	// 		orginal, err := os.Getwd()
 	// 		if err != nil {
-	// 			return wrapError(err), nil
+	// 			return WrapError(err), nil
 	// 		}
 
 	// 		if err := os.Chdir(workdir); err != nil {
-	// 			return wrapError(err), nil
+	// 			return WrapError(err), nil
 	// 		}
 	// 		defer os.Chdir(orginal) // Should not return an error
 
@@ -243,7 +243,7 @@ var osModule = map[string]tengo.Object{
 			}
 
 			if !primitive.IsArchiveSupported(name) {
-				return wrapError(errors.New("unsupported archive format")), nil
+				return WrapError(errors.New("unsupported archive format")), nil
 			}
 
 			//
@@ -262,7 +262,7 @@ var osModule = map[string]tengo.Object{
 
 				info, err := os.Stat(root)
 				if err != nil {
-					return wrapError(err), nil
+					return WrapError(err), nil
 				}
 
 				filenames = append(filenames, root)
@@ -294,7 +294,7 @@ var osModule = map[string]tengo.Object{
 					Exclude:      regexp.MustCompile(name + "$"),
 				})
 				if err != nil {
-					return wrapError(err), nil
+					return WrapError(err), nil
 				}
 
 				files = append(files, fs...)
@@ -304,25 +304,25 @@ var osModule = map[string]tengo.Object{
 
 			f, err := os.Create(name)
 			if err != nil {
-				return wrapError(err), nil
+				return WrapError(err), nil
 			}
 			defer f.Close()
 
 			codec, err := primitive.NewArchiveWriter(name, f)
 			if err != nil {
-				return wrapError(err), nil
+				return WrapError(err), nil
 			}
 
 			if err = codec.Archives(files); err != nil {
-				return wrapError(err), nil
+				return WrapError(err), nil
 			}
 
 			if err = codec.Close(); err != nil {
-				return wrapError(err), nil
+				return WrapError(err), nil
 			}
 
 			if err = f.Sync(); err != nil && !strings.HasSuffix(err.Error(), "operation not supported") {
-				return wrapError(err), nil
+				return WrapError(err), nil
 			}
 
 			return tengo.UndefinedValue, nil

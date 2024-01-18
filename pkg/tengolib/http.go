@@ -48,7 +48,7 @@ var httpModule = map[string]tengo.Object{
 
 			uri, err := url.Parse(URL)
 			if err != nil {
-				return wrapError(err), nil
+				return WrapError(err), nil
 			}
 			uri.Path = path.Join(uri.Path, path.Join(vargs...))
 
@@ -95,17 +95,17 @@ var httpModule = map[string]tengo.Object{
 
 			resp, err := http.Get(url)
 			if err != nil {
-				return wrapError(err), nil
+				return WrapError(err), nil
 			}
 			defer resp.Body.Close()
 
 			if resp.StatusCode != http.StatusOK {
-				return wrapError(errors.New("bad response status")), nil
+				return WrapError(errors.New("bad response status")), nil
 			}
 
 			f, err := os.Create(dst)
 			if err != nil {
-				return wrapError(err), nil
+				return WrapError(err), nil
 			}
 			defer f.Close()
 
@@ -116,11 +116,11 @@ var httpModule = map[string]tengo.Object{
 			}
 
 			if _, err := io.Copy(f, r); err != nil {
-				return wrapError(err), nil
+				return WrapError(err), nil
 			}
 
 			if err = f.Sync(); err != nil {
-				return wrapError(err), nil
+				return WrapError(err), nil
 			}
 
 			return tengo.UndefinedValue, nil

@@ -125,7 +125,7 @@ var filepathModule = map[string]tengo.Object{
 
 				r, err := regexp.Compile(s)
 				if err != nil {
-					return wrapError(err), nil
+					return WrapError(err), nil
 				}
 
 				patterns = append(patterns, r)
@@ -151,7 +151,7 @@ var filepathModule = map[string]tengo.Object{
 				return nil
 			})
 			if err != nil {
-				return wrapError(err), nil
+				return WrapError(err), nil
 			}
 
 			return matches, nil
