@@ -65,7 +65,7 @@ func Checksum(r io.Reader, algs ...ChecksumAlg) (map[ChecksumAlg]hash.Hash, erro
 				return nil, fmt.Errorf("blake2b: %w", err)
 			}
 		default:
-			return nil, fmt.Errorf("Unsuported algorithm: %s", alg)
+			return nil, fmt.Errorf("unsuported algorithm: %s", alg)
 		}
 		hashes = append(hashes, h)
 		mhashes[alg] = h

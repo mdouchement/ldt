@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -14,7 +15,6 @@ import (
 	"github.com/d5/tengo/v2/stdlib"
 	"github.com/mdouchement/ldt/pkg/lualib"
 	"github.com/mdouchement/ldt/pkg/tengolib"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
@@ -64,7 +64,7 @@ func action(_ *cobra.Command, args []string) error {
 	// The action does not have any extension.
 	filenames, err := lookup(args[0])
 	if err != nil {
-		return errors.Wrap(err, "could not lookup action")
+		return fmt.Errorf("could not lookup action: %w", err)
 	}
 	if len(filenames) == 0 {
 		return errors.New("not found")
@@ -88,7 +88,7 @@ func runlua(args []string) error {
 	lualib.Open(state)
 
 	// Forward CLI args to Lua script
-	var argv = []string{}
+	argv := []string{}
 	if len(args) > 1 {
 		for _, arg := range args[1:] {
 			argv = append(argv, fmt.Sprintf(`"%s"`, arg)) // Surrounding `arg` with double quotes
@@ -96,11 +96,14 @@ func runlua(args []string) error {
 	}
 	stmt := fmt.Sprintf("arg = {%s}", strings.Join(argv, ", ")) // Create `arg` table
 	if err := lua.DoString(state, stmt); err != nil {
-		return errors.Wrap(err, "could not forward argv")
+		return fmt.Errorf("could not forward argv: %w", err)
 	}
 
 	// Run the script
-	return errors.Wrap(lua.DoFile(state, args[0]), "could not run action")
+	if err := lua.DoFile(state, args[0]); err != nil {
+		return fmt.Errorf("could not run action: %w", err)
+	}
+	return nil
 }
 
 func runtengo(args []string) error {
@@ -142,7 +145,7 @@ func runtengo(args []string) error {
 func listActions() error {
 	filenames, err := lookup("*")
 	if err != nil {
-		return errors.Wrap(err, "could not list actions")
+		return fmt.Errorf("could not list actions: %w", err)
 	}
 
 	dup := make(map[string]int)

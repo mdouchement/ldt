@@ -1,6 +1,8 @@
 package tengolib
 
 import (
+	"maps"
+
 	"github.com/d5/tengo/v2"
 )
 
@@ -42,9 +44,7 @@ func MergeModule(modules *tengo.ModuleMap, names ...string) {
 			// Merge with existing one
 			m := modules.GetBuiltinModule(name)
 			if m != nil {
-				for k, v := range mod {
-					m.Attrs[k] = v
-				}
+				maps.Copy(m.Attrs, mod)
 
 				continue
 			}

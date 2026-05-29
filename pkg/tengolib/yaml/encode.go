@@ -5,7 +5,7 @@ import (
 
 	"github.com/d5/tengo/v2"
 	tjson "github.com/d5/tengo/v2/stdlib/json"
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v3"
 )
 
 // Encode returns the JSON encoding of the object.

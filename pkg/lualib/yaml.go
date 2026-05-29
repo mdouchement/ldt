@@ -3,7 +3,7 @@ package lualib
 import (
 	"github.com/Shopify/go-lua"
 	"github.com/Shopify/goluago/util"
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v3"
 )
 
 var yamlLibrary = []lua.RegistryFunction{

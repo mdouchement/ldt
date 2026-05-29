@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"slices"
 	"strings"
 
@@ -54,9 +55,7 @@ func (c *TarReader) Extract(yield FileHandler) error {
 		switch h.Typeflag {
 		case tar.TypeXGlobalHeader:
 			if strings.HasPrefix(h.Name, paxchecksum) {
-				for k, v := range h.PAXRecords {
-					c.checksums[k] = v
-				}
+				maps.Copy(c.checksums, h.PAXRecords)
 			}
 		case tar.TypeDir:
 			t = TypeDirectory
