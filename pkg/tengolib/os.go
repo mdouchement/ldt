@@ -21,8 +21,8 @@ import (
 )
 
 var osModule = map[string]tengo.Object{
-	"chmod_d": &tengo.Int{Value: 0755},
-	"chmod_f": &tengo.Int{Value: 0644},
+	"chmod_d": &tengo.Int{Value: 0o755},
+	"chmod_f": &tengo.Int{Value: 0o644},
 	// os.osname() => string
 	"osname": &tengo.UserFunction{
 		Name: "osname",
@@ -156,7 +156,7 @@ var osModule = map[string]tengo.Object{
 	"write_file": &tengo.UserFunction{
 		Name: "write_file",
 		Value: stdlib.FuncASSRE(func(filename, payload string) error {
-			return os.WriteFile(filename, []byte(payload), 0644)
+			return os.WriteFile(filename, []byte(payload), 0o644)
 		}),
 	},
 	// os.checksum(algorithm string, filename string) => string/error
@@ -185,6 +185,36 @@ var osModule = map[string]tengo.Object{
 		Value: stdlib.FuncASRS(func(path string) string {
 			return upathex.ExpandEnv(path)
 		}),
+	},
+	// os.read_dir(string) => []direntry/error
+	"read_dir": &tengo.UserFunction{
+		Name: "read_dir",
+		Value: func(args ...tengo.Object) (tengo.Object, error) {
+			if len(args) != 1 {
+				return nil, tengo.ErrWrongNumArguments
+			}
+
+			s1, ok := tengo.ToString(args[0])
+			if !ok {
+				return nil, tengo.ErrInvalidArgumentType{
+					Name:     "first",
+					Expected: "string(compatible)",
+					Found:    args[0].TypeName(),
+				}
+			}
+
+			entries, err := os.ReadDir(s1)
+			if err != nil {
+				return WrapError(err), nil
+			}
+
+			nentries := make([]tengo.Object, len(entries))
+			for i, entry := range entries {
+				nentries[i] = makeOSDirEntry(entry)
+			}
+
+			return &tengo.Array{Value: nentries}, nil
+		},
 	},
 	// os.indir(dir string, handler func() error) => error
 	// "indir": &tengo.UserFunction{
@@ -248,7 +278,6 @@ var osModule = map[string]tengo.Object{
 
 			//
 
-			var filenames []string
 			var base string
 			for idx, arg := range args[1:] {
 				root, ok := tengo.ToString(arg)
@@ -264,8 +293,6 @@ var osModule = map[string]tengo.Object{
 				if err != nil {
 					return WrapError(err), nil
 				}
-
-				filenames = append(filenames, root)
 
 				if !info.IsDir() {
 					root = filepath.Dir(root)

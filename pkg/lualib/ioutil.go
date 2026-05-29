@@ -1,7 +1,7 @@
 package lualib
 
 import (
-	"io/ioutil"
+	"os"
 
 	"github.com/Shopify/go-lua"
 )
@@ -12,7 +12,7 @@ var ioutilLibrary = []lua.RegistryFunction{
 		// Deprecated: Use os.read_file instead
 		Name: "read_file",
 		Function: func(l *lua.State) int {
-			data, err := ioutil.ReadFile(lua.CheckString(l, 1))
+			data, err := os.ReadFile(lua.CheckString(l, 1))
 			if err != nil {
 				lua.Errorf(l, err.Error())
 			}
