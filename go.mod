@@ -9,10 +9,10 @@ require (
 	github.com/direnv/direnv/v2 v2.37.1
 	github.com/mdouchement/upathex v0.1.0
 	github.com/spf13/cobra v1.10.2
-	github.com/vbauerster/mpb/v8 v8.12.1
+	github.com/vbauerster/mpb/v8 v8.14.0
 	github.com/zeebo/xxh3 v1.1.0
-	go.yaml.in/yaml/v3 v3.0.4
-	golang.org/x/crypto v0.52.0
+	go.yaml.in/yaml/v3 v3.0.5
+	golang.org/x/crypto v0.54.0
 )
 
 require (
@@ -21,13 +21,11 @@ require (
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
-	github.com/kr/pretty v0.3.1 // indirect
-	github.com/mattn/go-runewidth v0.0.23 // indirect
+	github.com/klauspost/cpuid/v2 v2.4.0 // indirect
+	github.com/mattn/go-runewidth v0.0.27 // indirect
 	github.com/pborman/uuid v1.2.1 // indirect
-	github.com/rogpeppe/go-internal v1.14.1 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/stretchr/testify v1.11.1 // indirect
-	golang.org/x/sys v0.45.0 // indirect
-	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
+	github.com/vbauerster/cupwriter v0.0.4 // indirect
+	golang.org/x/sys v0.47.0 // indirect
 )
