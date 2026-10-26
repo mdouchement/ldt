@@ -112,7 +112,13 @@ var httpModule = map[string]tengo.Object{
 			var r io.Reader = resp.Body
 			if progress {
 				defer time.Sleep(500 * time.Millisecond) // just to avoid glitches.
-				r = primitive.WithProgressBar(resp.ContentLength, r)
+				rc, err := primitive.WithProgressBar(resp.ContentLength, r)
+				if err != nil {
+					return WrapError(err), nil
+				}
+				defer rc.Close()
+
+				r = rc
 			}
 
 			if _, err := io.Copy(f, r); err != nil {

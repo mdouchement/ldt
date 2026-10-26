@@ -9,7 +9,7 @@ import (
 )
 
 // WithProgressBar attaches a progress bar to the given io.Reader.
-func WithProgressBar(size int64, r io.Reader) io.Reader {
+func WithProgressBar(size int64, r io.Reader) (io.ReadCloser, error) {
 	p := mpb.New(
 		mpb.WithWidth(60),
 		mpb.WithRefreshRate(50*time.Millisecond),
